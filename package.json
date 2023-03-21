@@ -35,6 +35,6 @@
     "gulp": "~3.9.1",
     "gulp-sequence": "1.0.0",
     "jest": "^23.6.0"
-    "typescript": "^3.9.7"
+    "typescript": "^3.8.3"
   }
 }
