@@ -30,8 +30,8 @@ jobs:
     - name: Run npm install
       run: |
         npm install
-        npm install -g typescript
-        npx tsc --version
+        npm install typescript --save-dev
+        tcs -v
     
     # gulp bundle and package solution
     - name: Bundle and package
