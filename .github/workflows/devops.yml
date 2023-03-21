@@ -1,0 +1,44 @@
+name: SPFx CICD with O365 CLI
+
+on: [push]
+
+
+# Set the name of the sppkg file
+env:
+  SPPKG_FILE_NAME: 'spfx-cicd.sppkg'
+  SEND_MAIL: 'true'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [10.x]
+    
+    steps:
+    # Checkout code
+    - name: Checkout code
+      uses: actions/checkout@v1
+      
+    # Setup node.js runtime
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    
+    # npm install
+    - name: Run npm install
+      run: npm install
+    
+    # gulp bundle and package solution
+    - name: Bundle and package
+      run: |
+        gulp bundle --ship
+        gulp package-solution --ship    
+    
+    # Upload artifacts (sppkg file)
+    - name: Upload artifact (sppkg file)
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: output
+        path: sharepoint/solution/${{ env.SPPKG_FILE_NAME }}
