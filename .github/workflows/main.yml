@@ -1,0 +1,83 @@
+name: SPFx CICD with O365 CLI
+
+on: [pull_request]
+
+# Set the name of the sppkg file
+env:
+  sppkgFileName: ${{ 'spfx-cicd.sppkg' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [10.x]
+    
+    steps:
+    # Checkout code
+    - name: Checkout code
+      uses: actions/checkout@v1
+      
+    # Setup node.js runtime
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    
+    # npm install
+    - name: Run npm install
+      run: npm install
+    
+    # gulp bundle and package solution
+    - name: Bundle and package
+      run: |
+        gulp bundle --ship
+        gulp package-solution --ship    
+    
+    # Compose the package path and save it in a variable
+    - name: Get package path
+      run: echo ::set-output name=packagepath::sharepoint/solution/$sppkgFileName
+      id: getpackagepath
+    
+    # Upload artifacts (sppkg file)
+    - name: Upload artifact (sppkg file)
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: output
+        path: ${{ steps.getpackagepath.outputs.packagepath }}
+        
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+    
+    # Download package (sppkg file)
+    - name: Download pacakge (sppkg file)
+      uses: actions/download-artifact@v1
+      with:
+        name: output
+    
+    # Login to tenant using action-cli-login
+    - name: Office 365 CLI Login
+      uses: anoopt/action-cli-login@master
+      env:
+        ADMIN_USERNAME:  ${{ secrets.adminUsername }}
+        ADMIN_PASSWORD:  ${{ secrets.adminPassword }}
+    
+    # Compose the artifact path and store it in a variable
+    - name: Get artifact path
+      run: echo ::set-output name=artifactpath::output/$sppkgFileName
+      id: getartifactpath
+    
+    # Deploy package to tenant using action-cli-deploy
+    - name: Office 365 CLI Deploy
+      uses: anoopt/action-cli-deploy@master
+      env:
+        APP_FILE_PATH: ${{ steps.getartifactpath.outputs.artifactpath }}
+    
+    # Send an email using action-cli-runscript
+    - name: Office 365 CLI Send email
+      uses: anoopt/action-cli-runscript@master
+      env:
+         O365_CLI_SCRIPT: o365 spo mail send --webUrl https://anoopccdev1.sharepoint.com/sites/teamsite --to 'anoop@anoopccdev1.onmicrosoft.com' --subject 'Deployment done' --body '<h2>Office 365 CLI</h2> <p>The deployment is complete.</p> <br/> Email sent via Office 365 CLI GitHub Action.'

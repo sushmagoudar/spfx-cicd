@@ -1,0 +1,26 @@
+{
+  "@pnp/generator-spfx": {
+    "framework": "none",
+    "pnpFramework": "none.plus",
+    "pnp-libraries": [
+      "rush@2.9"
+    ],
+    "pnp-ci": [
+      "azure"
+    ],
+    "pnp-vetting": [],
+    "spfxenv": "spo",
+    "pnp-testing": []
+  },
+  "@microsoft/generator-sharepoint": {
+    "environment": "spo",
+    "framework": "none",
+    "isCreatingSolution": true,
+    "version": "1.8.2",
+    "libraryName": "spfx-cicd",
+    "libraryId": "673ba8ba-2311-4adb-9eb0-0a5d23583bc6",
+    "packageManager": "npm",
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

@@ -1,0 +1,14 @@
+name: ENV Test
+
+on: [pull_request]
+
+# Set the name of the sppkg file
+env:
+  SEND_MAIL: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Say Hello
+        run: echo Hello
+        if: env.SEND_MAIL == true
